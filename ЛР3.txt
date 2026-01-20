@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Лабораторная работа №3 — JavaScript</title>
+  <title>Лабораторная работа №3 Исправленная версия 2 комит — JavaScript</title>
 </head>
 <body>
   <h1>Лабораторная работа №3</h1>
