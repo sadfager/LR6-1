@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лабораторная работа №3 — JavaScript</title>
+</head>
+<body>
+  <h1>Лабораторная работа №3</h1>
+  <p>При открытии страницы автоматически запустится консольный магазин.</p>
+  <p>Для тестирования функций parseCSV, min, max и т.д. — открой DevTools (F12) → Console.</p>
+
+  <script>
+    // === ЗАДАНИЕ 1: parseCSV ===
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      if (lines.length === 0) return [];
+      const headers = lines[0].split(',').map(h => h.trim());
+      const result = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        const obj = {};
+        for (let j = 0; j < headers.length; j++) {
+          obj[headers[j]] = values[j] !== undefined ? values[j] : '';
+        }
+        result.push(obj);
+      }
+      return result;
+    }
+
+    // === ЗАДАНИЕ 2: Работа с массивом чисел ===
+    function isNumberArray(arr) {
+      if (!Array.isArray(arr)) throw new Error('Input must be an array');
+      for (const item of arr) {
+        if (typeof item !== 'number' || isNaN(item)) {
+          throw new Error('All elements must be numbers');
+        }
+      }
+    }
+
+    function min(arr) {
+      isNumberArray(arr);
+      if (arr.length === 0) throw new Error('Array is empty');
+      return Math.min(...arr);
+    }
+
+    function max(arr) {
+      isNumberArray(arr);
+      if (arr.length === 0) throw new Error('Array is empty');
+      return Math.max(...arr);
+    }
+
+    function sort(order, arr) {
+      isNumberArray([...arr]);
+      const copy = [...arr];
+      if (order === true) return copy.sort((a, b) => a - b);
+      else if (order === false) return copy.sort((a, b) => b - a);
+      else throw new Error('Order must be true (asc) or false (desc)');
+    }
+
+    function find(arr, value) {
+      isNumberArray(arr);
+      return arr.includes(value);
+    }
+
+    function replicaRemove(arr) {
+      isNumberArray(arr);
+      return [...new Set(arr)];
+    }
+
+    // === ЗАДАНИЕ 3: Консольный магазин ===
+    class Product {
+      constructor(name, price) {
+        this.name = name;
+        this.price = price;
+      }
+    }
+
+    class Cart {
+      constructor() {
+        this.items = [];
+      }
+
+      addProduct(product) {
+        const existing = this.items.find(i => i.product.name === product.name);
+        if (existing) {
+          existing.quantity++;
+        } else {
+          this.items.push({ product, quantity: 1 });
+        }
+      }
+
+      removeProduct(productName) {
+        const index = this.items.findIndex(i => i.product.name === productName);
+        if (index === -1) {
+          alert(`Товар "${productName}" не найден в корзине`);
+          return;
+        }
+        if (this.items[index].quantity > 1) {
+          this.items[index].quantity--;
+        } else {
+          this.items.splice(index, 1);
+        }
+      }
+
+      getTotalPrice() {
+        return this.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      }
+
+      listProducts() {
+        if (this.items.length === 0) return "Корзина пуста";
+        return this.items.map(i => `${i.product.name} x${i.quantity} (${i.product.price} руб.)`).join('\n');
+      }
+    }
+
+    // === ЗАПУСК МАГАЗИНА ===
+    (function runShop() {
+      const products = [];
+      const cart = new Cart();
+
+      while (true) {
+        const choice = prompt(`
+Меню магазина:
+1. Добавить товар (в магазин)
+2. Добавить товар в корзину
+3. Удалить один товар из корзины
+4. Показать стоимость корзины
+0. Выход
+`.trim());
+
+        if (choice === null || choice === '0') break;
+
+        switch (choice) {
+          case '1': {
+            const name = prompt("Название товара:");
+            const priceStr = prompt("Цена товара (руб.):");
+            const price = parseFloat(priceStr);
+            if (name && !isNaN(price) && price >= 0) {
+              products.push(new Product(name, price));
+              alert(`Товар "${name}" добавлен в магазин`);
+            } else {
+              alert("Некорректные данные");
+            }
+            break;
+          }
+
+          case '2': {
+            if (products.length === 0) {
+              alert("Нет товаров в магазине");
+              break;
+            }
+            const names = products.map(p => p.name).join('\n');
+            const name = prompt(`Выберите товар для добавления в корзину:\n${names}`);
+            const product = products.find(p => p.name === name);
+            if (product) {
+              cart.addProduct(product);
+              alert(`"${name}" добавлен в корзину`);
+            } else {
+              alert("Товар не найден");
+            }
+            break;
+          }
+
+          case '3': {
+            if (cart.items.length === 0) {
+              alert("Корзина пуста");
+              break;
+            }
+            const names = cart.items.map(i => i.product.name).join('\n');
+            const name = prompt(`Выберите товар для удаления (удалится 1 шт.):\n${names}`);
+            cart.removeProduct(name);
+            break;
+          }
+
+          case '4':
+            alert(`Общая стоимость: ${cart.getTotalPrice()} руб.`);
+            break;
+
+          default:
+            alert("Неверный выбор");
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
